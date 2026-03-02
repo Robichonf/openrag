@@ -17,6 +17,7 @@ import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
 import { formatFilesToDelete } from "@/lib/format-files-to-delete";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTask } from "@/contexts/task-context";
 
 interface KnowledgeActionsDropdownProps {
   filename: string;
@@ -30,6 +31,7 @@ export const KnowledgeActionsDropdown = ({
   filename,
   connectorType,
 }: KnowledgeActionsDropdownProps) => {
+  const { refreshTasks } = useTask();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const deleteDocumentMutation = useDeleteDocument();
   const syncConnectorMutation = useSyncConnector();
@@ -49,7 +51,10 @@ export const KnowledgeActionsDropdown = ({
   const handleDelete = async () => {
     try {
       await deleteDocumentMutation.mutateAsync({ filename });
-      toast.success(`Successfully deleted "${filename}"`);
+      await refreshTasks();
+      toast.success("Successfully deleted document", {
+        description: formatFilesToDelete([{ filename }], 1),
+      });
       setShowDeleteDialog(false);
     } catch (error) {
       toast.error(
@@ -158,7 +163,7 @@ export const KnowledgeActionsDropdown = ({
         onConfirm={handleDelete}
         isLoading={deleteDocumentMutation.isPending}
       >
-        <p className="my-2">This will remove all chunks and data associated with this document. This action cannot be undone.</p>
+        <p className="my-2 overflow-hidden text-ellipsis max-w-[300px]">This will remove all chunks and data associated with this document. This action cannot be undone.</p>
         <p className="my-2">Document to be deleted:</p>
         {formatFilesToDelete([{ filename }])}
       </DeleteConfirmationDialog>
