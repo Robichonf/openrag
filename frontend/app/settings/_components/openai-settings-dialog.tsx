@@ -13,21 +13,15 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/auth-context";
 import {
   OpenAISettingsForm,
   type OpenAISettingsFormData,
 } from "./openai-settings-form";
+import ModelProviderDialogFooter from "./model-provider-dialog-footer";
 
 const OpenAISettingsDialog = ({
   open,
@@ -189,75 +183,21 @@ const OpenAISettingsDialog = ({
               )}
             </AnimatePresence>
 
-            {showRemoveConfirm ? (
-              <DialogFooter className="mt-4 flex items-center gap-2 rounded-lg border border-red-500/10 bg-red-500/5 px-4 py-3 animate-in fade-in-0 slide-in-from-bottom-2 duration-150">
-                <div className="border-l-2 border-destructive pl-3 mr-auto text-sm text-red-100">
-                  Remove configuration?
-                </div>
-                <Button
-                  variant="ghost"
-                  type="button"
-                  onClick={() => setShowRemoveConfirm(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  disabled={removeMutation.isPending}
-                  onClick={() =>
-                    removeMutation.mutate({ remove_openai_config: true })
-                  }
-                >
-                  {removeMutation.isPending ? "Removing..." : "Remove"}
-                </Button>
-              </DialogFooter>
-            ) : (
-              <DialogFooter className="mt-4 animate-in fade-in-0 slide-in-from-bottom-2 duration-150">
-                {isOpenAIConfigured && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="mr-auto">
-                          <Button
-                            variant="ghost"
-                            type="button"
-                            className="text-destructive hover:text-destructive"
-                            disabled={!canRemoveOpenAI}
-                            onClick={() => setShowRemoveConfirm(true)}
-                          >
-                            Remove
-                          </Button>
-                        </span>
-                      </TooltipTrigger>
-                      {!canRemoveOpenAI && (
-                        <TooltipContent>
-                          Configure another model provider before removing
-                          OpenAI
-                        </TooltipContent>
-                      )}
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => setOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={settingsMutation.isPending || isValidating}
-                >
-                  {settingsMutation.isPending
-                    ? "Saving..."
-                    : isValidating
-                      ? "Validating..."
-                      : "Save"}
-                </Button>
-              </DialogFooter>
-            )}
+            <ModelProviderDialogFooter
+              showRemoveConfirm={showRemoveConfirm}
+              onCancelRemove={() => setShowRemoveConfirm(false)}
+              onConfirmRemove={() =>
+                removeMutation.mutate({ remove_openai_config: true })
+              }
+              isRemovePending={removeMutation.isPending}
+              isConfigured={isOpenAIConfigured}
+              canRemove={canRemoveOpenAI}
+              removeDisabledTooltip="Configure another model provider before removing OpenAI"
+              onRequestRemove={() => setShowRemoveConfirm(true)}
+              onCancel={() => setOpen(false)}
+              isSavePending={settingsMutation.isPending}
+              isValidating={isValidating}
+            />
           </form>
         </FormProvider>
       </DialogContent>
