@@ -291,6 +291,19 @@ class TestDocuments:
             assert result.success is False
             assert result.deleted_chunks == 0
 
+    @pytest.mark.asyncio
+    async def test_delete_missing_document_is_idempotent(self, client):
+        """Deleting a never-ingested filename should not raise."""
+        import uuid
+
+        missing_filename = f"never_ingested_{uuid.uuid4().hex}.pdf"
+        result = await client.documents.delete(missing_filename)
+
+        assert result.success is False
+        assert result.deleted_chunks == 0
+        assert result.filename == missing_filename
+        assert result.error is not None
+
 
 class TestSearch:
     """Test search operations."""

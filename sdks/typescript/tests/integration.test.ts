@@ -287,6 +287,19 @@ describe.skipIf(SKIP_TESTS)("OpenRAG TypeScript SDK Integration", () => {
         expect(result.deleted_chunks).toBe(0);
       }
     });
+
+    it("should treat delete of missing document as idempotent", async () => {
+      const missingFilename = `never_ingested_${Date.now()}_${Math.random()
+        .toString(16)
+        .slice(2)}.pdf`;
+
+      const result = await client.documents.delete(missingFilename);
+
+      expect(result.success).toBe(false);
+      expect(result.deleted_chunks).toBe(0);
+      expect(result.filename).toBe(missingFilename);
+      expect(result.error).toBeDefined();
+    });
   });
 
   describe("Search", () => {
