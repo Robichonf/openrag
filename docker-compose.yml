@@ -115,7 +115,7 @@ services:
     environment:
       - OPENRAG_BACKEND_HOST=openrag-backend
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "${FRONTEND_PORT:-3111}:3111"
 
   langflow:
     volumes:
